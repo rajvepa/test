@@ -1,0 +1,302 @@
+AWSTemplateFormatVersion: 2010-09-09
+Resources:
+  vpc0be154a546f5a4502:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      InstanceTenancy: default
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags:
+        - Key: Name
+          Value: NARA-PilotVPC
+  subnet073f143bd5bdbed93:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      CidrBlock: 10.0.4.0/24
+      AvailabilityZone: us-east-1b
+      VpcId: !Ref vpc0be154a546f5a4502
+      Tags:
+        - Key: Name
+          Value: AZ2-Internal-LB-PrivateSubnet
+  subnet08eb7c911259b4855:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      CidrBlock: 10.0.6.0/24
+      AvailabilityZone: us-east-1b
+      VpcId: !Ref vpc0be154a546f5a4502
+      Tags:
+        - Key: Name
+          Value: AZ2-App-PrivateSubnet
+  subnet09cfccbdbfcc211f5:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: us-east-1a
+      VpcId: !Ref vpc0be154a546f5a4502
+      Tags:
+        - Key: Name
+          Value: AZ1-Web-PublicSubnet
+  subnet0d5283105b24b0b73:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      CidrBlock: 10.0.7.0/24
+      AvailabilityZone: us-east-1a
+      VpcId: !Ref vpc0be154a546f5a4502
+      Tags:
+        - Key: Name
+          Value: AZ1-DB-PrivateSubnet
+  subnet07b139f67ec62eeaf:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      CidrBlock: 10.0.5.0/24
+      AvailabilityZone: us-east-1a
+      VpcId: !Ref vpc0be154a546f5a4502
+      Tags:
+        - Key: Name
+          Value: AZ1-App-PrivateSubnet
+  subnet041dc1caa02addfe5:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: us-east-1a
+      VpcId: !Ref vpc0be154a546f5a4502
+      Tags:
+        - Key: Name
+          Value: AZ1-Internal-LB-PrivateSubnet
+  subnet07d901f8530e119aa:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      CidrBlock: 10.0.8.0/24
+      AvailabilityZone: us-east-1b
+      VpcId: !Ref vpc0be154a546f5a4502
+      Tags:
+        - Key: Name
+          Value: AZ2-DB-PrivateSubnet
+  subnet04ba748bc83c1a72d:
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: us-east-1b
+      VpcId: !Ref vpc0be154a546f5a4502
+      Tags:
+        - Key: Name
+          Value: AZ2-Web-PublicSubnet
+  igw096f0c94180f8dd68:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties: {}
+  doptd15b4db7:
+    Type: 'AWS::EC2::DHCPOptions'
+    Properties:
+      DomainName: ec2.internal
+      DomainNameServers:
+        - AmazonProvidedDNS
+  acl0545b3573d836a348:
+    Type: 'AWS::EC2::NetworkAcl'
+    Properties:
+      VpcId: !Ref vpc0be154a546f5a4502
+  rtb079174d4d5c62e982:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref vpc0be154a546f5a4502
+      Tags:
+        - Key: Name
+          Value: NARA-PilotVPC-MainRouteTable
+  rtb0cc048d42bed757e4:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref vpc0be154a546f5a4502
+      Tags:
+        - Key: Name
+          Value: AZ1-CustomRouteTable
+  rtb0a3d1d419df9d06f2:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref vpc0be154a546f5a4502
+      Tags:
+        - Key: Name
+          Value: AZ2-CustomeRouteTable
+  rtb0ae337914ead64df7:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref vpc0be154a546f5a4502
+      Tags:
+        - Key: Name
+          Value: VPC-PublicRouteTable
+  eip18211224100:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+  eip34205608:
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+  sgDBSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: DB layer Security Group
+      VpcId: !Ref vpc0be154a546f5a4502
+  sgInternalLBSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Security Group for internal LBs
+      VpcId: !Ref vpc0be154a546f5a4502
+  sgWebSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: Security group for public subnet
+      VpcId: !Ref vpc0be154a546f5a4502
+  sgAppSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: App layer security Group
+      VpcId: !Ref vpc0be154a546f5a4502
+  acl1:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Egress: 'true'
+      Protocol: '-1'
+      RuleAction: allow
+      RuleNumber: '100'
+      NetworkAclId: !Ref acl0545b3573d836a348
+  acl2:
+    Type: 'AWS::EC2::NetworkAclEntry'
+    Properties:
+      CidrBlock: 0.0.0.0/0
+      Protocol: '-1'
+      RuleAction: allow
+      RuleNumber: '100'
+      NetworkAclId: !Ref acl0545b3573d836a348
+  subnetacl1:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      NetworkAclId: !Ref acl0545b3573d836a348
+      SubnetId: !Ref subnet041dc1caa02addfe5
+  subnetacl2:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      NetworkAclId: !Ref acl0545b3573d836a348
+      SubnetId: !Ref subnet073f143bd5bdbed93
+  subnetacl3:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      NetworkAclId: !Ref acl0545b3573d836a348
+      SubnetId: !Ref subnet07d901f8530e119aa
+  subnetacl4:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      NetworkAclId: !Ref acl0545b3573d836a348
+      SubnetId: !Ref subnet08eb7c911259b4855
+  subnetacl5:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      NetworkAclId: !Ref acl0545b3573d836a348
+      SubnetId: !Ref subnet07b139f67ec62eeaf
+  subnetacl6:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      NetworkAclId: !Ref acl0545b3573d836a348
+      SubnetId: !Ref subnet04ba748bc83c1a72d
+  subnetacl7:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      NetworkAclId: !Ref acl0545b3573d836a348
+      SubnetId: !Ref subnet0d5283105b24b0b73
+  subnetacl8:
+    Type: 'AWS::EC2::SubnetNetworkAclAssociation'
+    Properties:
+      NetworkAclId: !Ref acl0545b3573d836a348
+      SubnetId: !Ref subnet09cfccbdbfcc211f5
+  gw1:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      VpcId: !Ref vpc0be154a546f5a4502
+      InternetGatewayId: !Ref igw096f0c94180f8dd68
+  subnetroute2:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref rtb0cc048d42bed757e4
+      SubnetId: !Ref subnet041dc1caa02addfe5
+  subnetroute3:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref rtb0cc048d42bed757e4
+      SubnetId: !Ref subnet07b139f67ec62eeaf
+  subnetroute4:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref rtb0cc048d42bed757e4
+      SubnetId: !Ref subnet0d5283105b24b0b73
+  subnetroute5:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref rtb0a3d1d419df9d06f2
+      SubnetId: !Ref subnet07d901f8530e119aa
+  subnetroute6:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref rtb0a3d1d419df9d06f2
+      SubnetId: !Ref subnet08eb7c911259b4855
+  subnetroute7:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref rtb0a3d1d419df9d06f2
+      SubnetId: !Ref subnet073f143bd5bdbed93
+  subnetroute8:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref rtb0ae337914ead64df7
+      SubnetId: !Ref subnet04ba748bc83c1a72d
+  subnetroute9:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref rtb0ae337914ead64df7
+      SubnetId: !Ref subnet09cfccbdbfcc211f5
+  route1:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref rtb0cc048d42bed757e4
+  route2:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref rtb0a3d1d419df9d06f2
+  route3:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref rtb0ae337914ead64df7
+      GatewayId: !Ref igw096f0c94180f8dd68
+    DependsOn: gw1
+  dchpassoc1:
+    Type: 'AWS::EC2::VPCDHCPOptionsAssociation'
+    Properties:
+      VpcId: !Ref vpc0be154a546f5a4502
+      DhcpOptionsId: !Ref doptd15b4db7
+  egress1:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref sgDBSecurityGroup
+      IpProtocol: '-1'
+      CidrIp: 0.0.0.0/0
+  egress2:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref sgInternalLBSecurityGroup
+      IpProtocol: '-1'
+      CidrIp: 0.0.0.0/0
+  egress3:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref sgWebSecurityGroup
+      IpProtocol: '-1'
+      CidrIp: 0.0.0.0/0
+  egress4:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !Ref sgAppSecurityGroup
+      IpProtocol: '-1'
+      CidrIp: 0.0.0.0/0
+Description: NARA Pilot VPC
